@@ -18,16 +18,26 @@ if (!in_array($file['type'], $allowedTypes)) {
 
 // Generate unique filename
 $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-$filename = 'qr_img_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
-$targetPath = '../../uploads/' . $filename;
+$filename = 'qr_img_' . time() . '_' . rand(1000, 9999) . '.' . strtolower($ext);
+$uploadDir = '../../uploads/';
+
+// Ensure directory exists
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+
+$targetPath = $uploadDir . $filename;
 
 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-    // Protocol detection for domain URL construction
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+    // Detect protocol and host dynamically
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
     $host = $_SERVER['HTTP_HOST'];
     
-    // Construct public link pointing directly to the saved image
-    $publicUrl = $protocol . $host . '/Scaner/uploads/' . $filename;
+    // Build root relative path dynamically (works locally and in Docker)
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME']); // e.g. /api/qr or /Scaner/api/qr
+    $baseDir = preg_replace('#/api/qr$#', '', $scriptDir); // strip /api/qr
+    
+    $publicUrl = $protocol . $host . $baseDir . '/uploads/' . $filename;
 
     echo json_encode([
         'success' => true,
@@ -35,5 +45,5 @@ if (move_uploaded_file($file['tmp_name'], $targetPath)) {
         'message' => 'Image uploaded successfully!'
     ]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Failed to save uploaded image.']);
+    echo json_encode(['success' => false, 'message' => 'Failed to save uploaded image. Check folder permissions.']);
 }
