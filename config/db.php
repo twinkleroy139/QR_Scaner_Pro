@@ -1,7 +1,6 @@
 <?php
 // config/db.php
 
-// Read from Render Environment Variables (or fallback to local XAMPP defaults)
 $host = getenv('DB_HOST') ?: 'localhost';
 $db   = getenv('DB_NAME') ?: 'qr_scanner_db';
 $user = getenv('DB_USER') ?: 'root';
@@ -17,6 +16,30 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
+
+    // Auto-create required tables if they don't exist yet
+    $schema = "
+    CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;
+
+    CREATE TABLE IF NOT EXISTS scan_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        scan_type ENUM('scan', 'generate') NOT NULL DEFAULT 'scan',
+        content_type ENUM('url', 'text', 'image', 'other') NOT NULL DEFAULT 'text',
+        qr_data TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
+    ";
+
+    $pdo->exec($schema);
+
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
