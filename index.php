@@ -33,11 +33,11 @@ session_start();
     <div>
         <a href="index.php" style="background: #3b82f6; padding: 6px 12px; border-radius: 4px;">Scanner</a>
         <a href="generator.php" style="padding: 6px 12px;">Generator</a>
+        <a href="dashboard.php" style="padding: 6px 12px;">Dashboard</a>
         <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="dashboard.php" style="padding: 6px 12px;">Dashboard</a>
-            <a href="#" id="logout-link" style="padding: 6px 12px; color: #ef4444;">Logout</a>
+            <a href="#" id="logout-link" style="padding: 6px 12px; color: #ef4444;">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a>
         <?php else: ?>
-            <a href="test_auth.php" style="padding: 6px 12px;">Login / Register</a>
+            <a href="auth.php" style="padding: 6px 12px;">Login / Register</a>
         <?php endif; ?>
     </div>
 </div>

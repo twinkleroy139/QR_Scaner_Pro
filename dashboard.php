@@ -66,7 +66,7 @@ $username = $isLoggedIn ? $_SESSION['username'] : 'Guest';
             <div class="guest-banner">
                 <h3>History Backup Disabled for Guests</h3>
                 <p style="margin-top: 5px;">Scans and generated QR codes are not saved in guest mode. Log in or create an account to back up your scan history automatically across sessions.</p>
-                <a href="test_auth.php" class="btn-auth">Login or Create Account</a>
+                <a href="auth.php" class="btn-auth">Login or Create Account</a>
             </div>
         <?php else: ?>
             <!-- Shown only for Logged-in users -->
